@@ -98,11 +98,13 @@ Full schema in `prisma/schema.prisma`.
 - [x] Auto-send configurable via `CLOSER_AUTO_REPLY` env (default: false = draft for manual approval)
 - [x] Updates lead status based on classification (INTERESTED/OBJECTION/REPLIED/CLOSED_LOST)
 
-### Phase 8: OpenClaw Integration + Growth
-- [ ] HTTP API contract for OpenClaw to call (`src/integrations/openclaw/`)
-- [ ] Webhook client to send events back to OpenClaw
-- [ ] Growth agent: nurture sequences, re-engagement
-- [ ] Chat endpoint: natural language -> agent routing
+### Phase 8: OpenClaw Integration + Growth ✅
+- [x] OpenClaw webhook client (`src/integrations/openclaw/client.ts` + `notify.ts`) — fire-and-forget event notifications
+- [x] OpenClaw HTTP API (`/api/openclaw/`) — campaigns, stats, leads, leads/[id]/action — all authenticated via x-api-key
+- [x] Event notifications wired into: scout (lead.found), outreach (lead.contacted), closer (lead.replied/interested/closed_lost), payment (lead.closed_won)
+- [x] Chat endpoint (`/api/chat`) — LLM-powered intent parsing → agent routing (scout, intel, builder, outreach, stats, status)
+- [x] ChatInput component wired to POST /api/chat with Enter key support and response display
+- [x] Scheduler worker (`src/workers/scheduler.worker.ts`) — repeatable job every 6h, re-engages stalled leads + triggers follow-ups for opened-no-reply
 
 ### Phase 9: Real-time + Polish
 - [ ] Server-Sent Events for live activity feed

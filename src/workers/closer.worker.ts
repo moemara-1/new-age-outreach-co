@@ -3,6 +3,7 @@ import { PrismaClient, Prisma } from "@prisma/client";
 import { logger } from "../lib/logger";
 import { generateJSON, generateText } from "../integrations/llm/openrouter";
 import { sendEmail } from "../integrations/email/resend";
+import { notifyOpenClaw } from "../integrations/openclaw/notify";
 
 const AGENT = "closer";
 
@@ -150,6 +151,13 @@ Generate JSON:
             metadata: { leadId: lead.id, classification, autoSent: autoReply && classification !== "NOT_INTERESTED" },
           },
         });
+
+        const eventMap: Record<string, string> = {
+          INTERESTED: "lead.interested",
+          NOT_INTERESTED: "lead.closed_lost",
+        };
+        const openClawEvent = eventMap[classification] ?? "lead.replied";
+        notifyOpenClaw({ event: openClawEvent as never, leadId: lead.id, data: { classification, reasoning } });
 
         const result = {
           leadId: lead.id,

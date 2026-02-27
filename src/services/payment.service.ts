@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { createPaymentLink } from "@/integrations/payment/stripe";
+import { notifyOpenClaw } from "@/integrations/openclaw/client";
 
 const AGENT = "payment";
 
@@ -104,6 +105,8 @@ export async function markPaymentComplete(params: {
       metadata: { leadId, stripePaymentId },
     },
   });
+
+  notifyOpenClaw({ event: "lead.closed_won", leadId, data: { stripePaymentId, businessName: lead.business.name } });
 
   logger.info(AGENT, `Payment complete for ${lead.business.name}`, { stripePaymentId });
 }

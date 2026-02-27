@@ -3,6 +3,7 @@ import { PrismaClient, Prisma } from "@prisma/client";
 import { logger } from "../lib/logger";
 import { generateJSON } from "../integrations/llm/openrouter";
 import { sendEmail } from "../integrations/email/resend";
+import { notifyOpenClaw } from "../integrations/openclaw/notify";
 
 const AGENT = "outreach";
 
@@ -154,6 +155,8 @@ Generate JSON:
           where: { id: agentRunId },
           data: { status: "COMPLETED", finishedAt: new Date(), output: result as unknown as Prisma.InputJsonValue },
         });
+
+        notifyOpenClaw({ event: "lead.contacted", leadId: lead.id, data: { messageType, subject: email.subject } });
 
         logger.info(AGENT, `Sent ${messageType} to ${biz.name} (${lead.contactEmail})`);
         return result;
