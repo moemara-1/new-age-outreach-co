@@ -2,6 +2,7 @@ import { Worker, Job } from "bullmq";
 import { PrismaClient, Prisma } from "@prisma/client";
 import { logger } from "../lib/logger";
 import { searchPlaces, filterNoWebsite, type PlaceResult } from "../integrations/maps/places";
+import { notifyOpenClaw } from "../integrations/openclaw/notify";
 
 const AGENT = "scout";
 
@@ -58,6 +59,10 @@ export function createScoutWorker(connection: { host: string; port: number }) {
           where: { id: agentRunId },
           data: { status: "COMPLETED", finishedAt: new Date(), output: result },
         });
+
+        if (leadsCreated > 0) {
+          notifyOpenClaw({ event: "lead.found", leadId: campaignId, data: result });
+        }
 
         logger.info(AGENT, "Completed", result);
         return result;

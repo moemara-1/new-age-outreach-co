@@ -22,5 +22,6 @@ export const env = {
   get CLOUDFLARE_ACCOUNT_ID() { return required("CLOUDFLARE_ACCOUNT_ID"); },
   get OPENCLAW_WEBHOOK_URL() { return optional("OPENCLAW_WEBHOOK_URL"); },
   get OPENCLAW_API_KEY() { return optional("OPENCLAW_API_KEY"); },
+  get CLOSER_AUTO_REPLY() { return optional("CLOSER_AUTO_REPLY", "false") === "true"; },
   get APP_URL() { return optional("NEXT_PUBLIC_APP_URL", "http://localhost:3000"); },
 } as const;

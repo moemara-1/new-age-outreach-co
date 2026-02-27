@@ -90,10 +90,13 @@ Full schema in `prisma/schema.prisma`.
 - [x] Payment API route (`/api/leads/[id]/payment`) — POST to create payment link for a lead ($499 default)
 - [x] Lead detail page — shows payment link button when unpaid, hides when paid
 
-### Phase 7: Closer Agent (AI Objection Handling)
-- [ ] Classify inbound replies (interested, objection, question, not interested)
-- [ ] LLM generates contextual replies (Claude Opus for nuance)
-- [ ] Auto-send or queue for manual approval (configurable)
+### Phase 7: Closer Agent (AI Objection Handling) ✅
+- [x] Inbound reply webhook (`/api/webhooks/email/inbound`) — extracts lead_id from reply-to address, enqueues closer job
+- [x] Closer service (`src/services/closer.service.ts`) — classifies reply (DeepSeek), generates contextual response (Claude Sonnet 4)
+- [x] Closer worker (`src/workers/closer.worker.ts`) — classify → generate reply → auto-send or draft, concurrency 3
+- [x] Reply classification: INTERESTED → payment link, OBJECTION → address concerns, QUESTION → answer, NOT_INTERESTED → graceful exit
+- [x] Auto-send configurable via `CLOSER_AUTO_REPLY` env (default: false = draft for manual approval)
+- [x] Updates lead status based on classification (INTERESTED/OBJECTION/REPLIED/CLOSED_LOST)
 
 ### Phase 8: OpenClaw Integration + Growth
 - [ ] HTTP API contract for OpenClaw to call (`src/integrations/openclaw/`)
