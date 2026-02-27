@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  RESEARCHED
+  SITE_BUILT
+  CONTACTED
+  REPLIED
+  INTERESTED
+  OBJECTION
+  CLOSED_WON
+  CLOSED_LOST
+  UNSUBSCRIBED
+}
+
+enum AgentName {
+  SCOUT
+  INTEL
+  BUILDER
+  OUTREACH
+  CLOSER
+  GROWTH
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum OutreachType {
+  INITIAL
+  FOLLOW_UP_1
+  FOLLOW_UP_2
+  FOLLOW_UP_3
+  REPLY
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String
+  location  String
+  category  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads     Lead[]
+  agentRuns AgentRun[]
+
+  @@index([active])
+}
+
+model Business {
+  id          String  @id @default(cuid())
+  placeId     String  @unique
+  name        String
+  address     String?
+  phone       String?
+  website     String?
+  category    String?
+  rating      Float?
+  reviewCount Int?
+  lat         Float?
+  lng         Float?
+  rawData     Json?
+
+  lead Lead?
+
+  @@index([placeId])
+}
+
+model Lead {
+  id           String     @id @default(cuid())
+  status       LeadStatus @default(NEW)
+  businessId   String     @unique
+  campaignId   String
+  contactEmail String?
+  contactName  String?
+  leadScore    Int?
+  profileJson  Json?
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id])
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+
+  demoSite         DemoSite?
+  outreachMessages OutreachMessage[]
+  payment          Payment?
+
+  @@index([status])
+  @@index([campaignId])
+}
+
+model DemoSite {
+  id          String   @id @default(cuid())
+  leadId      String   @unique
+  url         String
+  template    String
+  generatedAt DateTime @default(now())
+  htmlContent String?
+  copyJson    Json?
+
+  lead Lead @relation(fields: [leadId], references: [id])
+}
+
+model OutreachMessage {
+  id        String       @id @default(cuid())
+  leadId    String
+  resendId  String?      @unique
+  type      OutreachType
+  subject   String
+  body      String
+  sentAt    DateTime?
+  openedAt  DateTime?
+  clickedAt DateTime?
+  repliedAt DateTime?
+  replyBody String?
+  createdAt DateTime     @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id])
+
+  @@index([leadId])
+  @@index([type])
+}
+
+model Payment {
+  id               String   @id @default(cuid())
+  leadId           String   @unique
+  stripePaymentId  String?  @unique
+  stripeLinkUrl    String?
+  amount           Int
+  currency         String   @default("usd")
+  paid             Boolean  @default(false)
+  paidAt           DateTime?
+  createdAt        DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id])
+}
+
+model AgentRun {
+  id         String         @id @default(cuid())
+  agent      AgentName
+  campaignId String?
+  status     AgentRunStatus @default(QUEUED)
+  input      Json?
+  output     Json?
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime       @default(now())
+
+  campaign Campaign? @relation(fields: [campaignId], references: [id])
+
+  @@index([agent])
+  @@index([status])
+  @@index([campaignId])
+}
+
+model ActivityLog {
+  id        String    @id @default(cuid())
+  agent     AgentName
+  title     String
+  subtitle  String?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([agent])
+}

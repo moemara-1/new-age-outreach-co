@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx next:*)",
+      "Bash(do sed:*)",
+      "Skill(claude-developer-platform)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
