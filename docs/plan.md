@@ -106,13 +106,18 @@ Full schema in `prisma/schema.prisma`.
 - [x] ChatInput component wired to POST /api/chat with Enter key support and response display
 - [x] Scheduler worker (`src/workers/scheduler.worker.ts`) — repeatable job every 6h, re-engages stalled leads + triggers follow-ups for opened-no-reply
 
-### Phase 9: Real-time + Polish
-- [ ] Server-Sent Events for live activity feed
-- [ ] Error boundaries, loading states, rate limiting
-- [ ] Production hardening
+### Phase 9: Real-time + Polish ✅
+- [x] Server-Sent Events for live activity feed (polling-based SSE with exponential backoff reconnection)
+- [x] Error boundaries for all routes (global, leads, leads/[id], campaigns)
+- [x] Loading skeletons for all routes (dashboard, leads, leads/[id], campaigns)
+- [x] Rate limiting middleware (in-memory, per-IP, route-specific limits)
+- [x] API route hardening — try/catch + input validation on all routes
+- [x] OpenClaw API key auth enforced in middleware
 
 ---
 
 ## Cost Estimate (MVP)
 
 ~$5/mo (Railway hobby) + ~$10-30/mo Claude API usage. Everything else has generous free tiers.
+
+## Status: All 9 phases complete.

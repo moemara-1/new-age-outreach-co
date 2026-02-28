@@ -16,28 +16,42 @@ export function ActivitySidebar({ entries: initial }: { entries: ActivityEntry[]
   const seenIds = useRef(new Set(initial.map((e) => e.id)));
 
   useEffect(() => {
-    const es = new EventSource("/api/activity/stream");
+    let es: EventSource | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout>;
+    let backoff = 2000;
+    let cancelled = false;
 
-    es.onmessage = (event) => {
-      try {
-        const entry: ActivityEntry = JSON.parse(event.data);
-        if (seenIds.current.has(entry.id)) return;
-        seenIds.current.add(entry.id);
-        setEntries((prev) => [entry, ...prev].slice(0, 100));
-      } catch {
-        // ignore malformed events
-      }
+    function connect() {
+      if (cancelled) return;
+      es = new EventSource("/api/activity/stream");
+
+      es.onmessage = (event) => {
+        backoff = 2000;
+        try {
+          const entry: ActivityEntry = JSON.parse(event.data);
+          if (seenIds.current.has(entry.id)) return;
+          seenIds.current.add(entry.id);
+          setEntries((prev) => [entry, ...prev].slice(0, 100));
+        } catch {
+          // ignore malformed events
+        }
+      };
+
+      es.onerror = () => {
+        es?.close();
+        if (cancelled) return;
+        reconnectTimeout = setTimeout(connect, backoff);
+        backoff = Math.min(backoff * 2, 30_000);
+      };
+    }
+
+    connect();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(reconnectTimeout);
+      es?.close();
     };
-
-    es.onerror = () => {
-      es.close();
-      setTimeout(() => {
-        const retry = new EventSource("/api/activity/stream");
-        Object.assign(es, retry);
-      }, 5000);
-    };
-
-    return () => es.close();
   }, []);
 
   return (

@@ -3,6 +3,7 @@ import { Queue } from "bullmq";
 import { db } from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { generateJSON } from "@/integrations/llm/openrouter";
+import { logger } from "@/lib/logger";
 
 type Intent = {
   action: "scout" | "intel" | "builder" | "outreach" | "status" | "stats" | "unknown";
@@ -13,12 +14,23 @@ type Intent = {
 };
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const { message } = await request.json();
+  let message: string;
+  try {
+    const body = await request.json();
+    message = body.message;
+  } catch {
+    return NextResponse.json({ reply: "Invalid request body." }, { status: 400 });
+  }
 
   if (!message || typeof message !== "string") {
     return NextResponse.json({ reply: "Please type a message." });
   }
 
+  if (message.length > 1000) {
+    return NextResponse.json({ reply: "Message too long. Keep it under 1000 characters." }, { status: 400 });
+  }
+
+  try {
   const intent = await generateJSON<Intent>(
     `Parse this user message into an action intent.
 
@@ -152,5 +164,9 @@ Generate JSON:
         reply: "I can help you find leads, check stats, or run agents. Try: 'Find plumbers in Austin' or 'Show me stats'",
         action: "unknown",
       });
+  }
+  } catch (err) {
+    logger.error("api/chat", "Chat processing failed", { error: String(err) });
+    return NextResponse.json({ reply: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
