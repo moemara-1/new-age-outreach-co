@@ -10,40 +10,35 @@ export type TaskType =
 export type ModelEntry = {
   id: string;
   name: string;
-  free?: boolean;
 };
 
 export const TASK_MODELS: Record<TaskType, ModelEntry> = {
   "intel": {
-    id: "deepseek/deepseek-chat-v3-0324:free",
-    name: "DeepSeek V3 (free)",
-    free: true,
+    id: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Llama 3.3 70B",
   },
   "builder-copy": {
-    id: "minimax/minimax-m1-80k",
-    name: "MiniMax M1",
+    id: "qwen/qwen3-coder:free",
+    name: "Qwen3 Coder",
   },
   "builder-html": {
-    id: "minimax/minimax-m1-80k",
-    name: "MiniMax M1",
+    id: "qwen/qwen3-coder:free",
+    name: "Qwen3 Coder",
   },
   "outreach": {
-    id: "deepseek/deepseek-chat-v3-0324:free",
-    name: "DeepSeek V3 (free)",
-    free: true,
+    id: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Llama 3.3 70B",
   },
   "closer": {
-    id: "anthropic/claude-sonnet-4",
-    name: "Claude Sonnet 4",
+    id: "qwen/qwen3-next-80b-a3b-instruct:free",
+    name: "Qwen3 Next 80B",
   },
   "classify": {
-    id: "deepseek/deepseek-chat-v3-0324:free",
-    name: "DeepSeek V3 (free)",
-    free: true,
+    id: "mistralai/mistral-small-3.1-24b-instruct:free",
+    name: "Mistral Small 3.1",
   },
   "general": {
-    id: "deepseek/deepseek-chat-v3-0324:free",
-    name: "DeepSeek V3 (free)",
-    free: true,
+    id: "mistralai/mistral-small-3.1-24b-instruct:free",
+    name: "Mistral Small 3.1",
   },
 };

@@ -7,7 +7,7 @@ type AgentCardProps = {
 
 export function AgentCard({ name, emoji, status, statusLabel }: AgentCardProps) {
   return (
-    <div className="flex flex-col gap-2 bg-[#161616] rounded-2xl p-6 w-[260px] h-[170px]">
+    <div className="flex flex-col gap-2 bg-[#161616] rounded-2xl px-4 py-6 w-[260px] h-[170px]">
       <span className="text-[40px] leading-none">{emoji}</span>
       <span className="text-lg font-semibold text-white">{name}</span>
       <div className="flex items-center gap-1.5">

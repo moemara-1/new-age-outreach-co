@@ -16,7 +16,7 @@ export function StatusDot({ color }: { color: BadgeProps["color"] }) {
 
 export function CountBadge({ count }: { count: number }) {
   return (
-    <span className="bg-[#1A1A1A] text-[#999] text-xs font-mono px-2 py-0.5 rounded-xl">
+    <span className="bg-[#1A1A1A] text-[#999] text-[11px] font-semibold px-2 py-0.5 rounded-xl">
       {count}
     </span>
   );

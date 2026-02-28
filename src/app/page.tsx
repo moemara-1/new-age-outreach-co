@@ -66,13 +66,13 @@ export default async function DashboardPage() {
       <div className="flex flex-1 min-h-0">
         <main className="flex flex-col flex-1 min-w-0">
           <SubHeader />
-          <div className="flex-1 px-15 py-5 overflow-y-auto">
-            <div className="flex flex-wrap gap-8 justify-start">
+          <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-10 py-6 gap-8">
+            <div className="flex gap-6">
               {agents.slice(0, 3).map((a) => (
                 <AgentCard key={a.name} {...a} />
               ))}
             </div>
-            <div className="flex flex-wrap gap-8 justify-start mt-10">
+            <div className="flex gap-6">
               {agents.slice(3).map((a) => (
                 <AgentCard key={a.name} {...a} />
               ))}

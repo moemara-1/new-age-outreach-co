@@ -55,15 +55,11 @@ export function ActivitySidebar({ entries: initial }: { entries: ActivityEntry[]
   }, []);
 
   return (
-    <aside className="w-80 bg-[#0C0C0C] border-l border-[#1A1A1A] flex flex-col shrink-0 h-full">
+    <aside className="w-80 bg-[#0C0C0C] border-l border-[#1A1A1A] flex flex-col shrink-0 h-full pr-4">
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-white">Activity</span>
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-          </span>
-          <span className="text-xs text-[#666]">Live</span>
+          <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
+          <span className="text-[13px] font-bold text-white tracking-[1.5px]">ACTIVITY</span>
         </div>
         <CountBadge count={entries.length} />
       </div>
@@ -81,14 +77,18 @@ function ActivityItem({ entry }: { entry: ActivityEntry }) {
   return (
     <div className="bg-[#111] rounded-lg p-3 flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <span className="text-[11px] font-semibold font-mono text-[#666]">
+        <span className="text-[11px] font-semibold text-[#666]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           {entry.agent}
         </span>
-        <span className="text-[11px] font-mono text-[#444]">{entry.time}</span>
+        <span className="text-[11px] text-[#444]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          {entry.time}
+        </span>
       </div>
       <span className="text-[13px] font-medium text-white">{entry.title}</span>
       {entry.subtitle && (
-        <span className="text-[11px] font-mono text-[#555]">{entry.subtitle}</span>
+        <span className="text-[11px] text-[#555]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          {entry.subtitle}
+        </span>
       )}
     </div>
   );

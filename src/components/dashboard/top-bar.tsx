@@ -14,7 +14,7 @@ export function TopBar({ stats }: { stats: Stats }) {
     <div className="flex items-center justify-between h-14 px-6 bg-[#0C0C0C] shrink-0">
       <div className="flex items-center gap-4">
         <span className="text-[22px] font-extrabold italic text-white tracking-tight">
-          MAX
+          NEW AGE
         </span>
         <button className="flex items-center gap-2 bg-[#1A1A1A] rounded-md px-3.5 py-1.5 text-sm font-medium text-white">
           demo
