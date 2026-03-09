@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { ActivityModal } from "@/components/dashboard/activity-modal";
 import { ResearchButton } from "@/components/leads/research-button";
+import { OutreachButton } from "@/components/leads/outreach-button";
 
 const STATUS_COLORS: Record<string, string> = {
   NEW: "bg-gray-500",
@@ -120,11 +121,7 @@ export default async function LeadsPage() {
                       ) : (
                         <span className="text-[#444] text-xs">No Site</span>
                       )}
-                      {lead.outreachMessages.length > 0 ? (
-                        <span className="text-green-400 text-xs">{lead.outreachMessages.length} Email(s) Sent</span>
-                      ) : (
-                        <span className="text-[#444] text-xs">No outreach</span>
-                      )}
+                      <OutreachButton messages={lead.outreachMessages} />
                     </div>
                   </td>
                 </tr>

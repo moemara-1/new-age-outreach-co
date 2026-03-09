@@ -86,26 +86,44 @@ export function createOutreachWorker(connection: { host: string; port: number })
 
         const biz = lead.business;
         const demoUrl = lead.demoSite?.url ?? "N/A";
+        const profile = lead.profileJson as any;
 
-        const prompt = `Write a cold outreach email for this local business.
+        const intelContext = profile ? `
+Intel Data (Use this to personalize the hook!):
+- Strengths to compliment: ${(profile.strengths || []).join(", ")}
+- Weaknesses/Issues to fix: ${(profile.weaknesses || []).join(", ")}
+- Missed Opportunities: ${(profile.opportunities || []).join(", ")}
+` : "";
 
+        const prompt = `You are an elite, high-converting copywriter working for a premium web design agency ("New Age"). Your goal is to write a highly personalized cold outreach email that gets local business owners to click their custom demo site and reply to you.
+
+Rules for the Email:
+1. DO NOT sound like an AI or a generic marketer. Sound like a sharp, observant local expert who genuinely cares about their business.
+2. Hook them instantly by complimenting a specific strength or respectfully calling out a missed opportunity/weakness from the Intel Data.
+3. Don't just generically say "we made a site" — tell them you proactively built them a custom solution to specifically fix [Issue] and capture more [Metric: e.g. foot traffic, bookings, online orders].
+4. Keep it punchy, conversational, and highly relevant to their exact business category.
+5. Make the Call to Action irresistible.
+
+Business Details:
 Business: ${biz.name}
 Category: ${biz.category ?? "Local business"}
 Location: ${biz.address ?? "Unknown"}
-Contact: ${lead.contactName ?? "Business Owner"}
+Contact Name: ${lead.contactName ?? "Business Owner"}
 Demo site URL: ${demoUrl}
+${intelContext}
 
+Sequence Context:
 ${FOLLOW_UP_CONTEXT[messageType]}
 
 Generate JSON:
 {
-  "subject": "Email subject line (max 60 chars, no spam words, personalized)",
-  "body": "Email body in HTML. Keep it under 150 words. Use <p> tags. Include a link to the demo site as a button-style link. Sign off as Max."
+  "subject": "Irresistible, highly personalized subject line (max 8 words, lowercase formatting is okay, NO spam words)",
+  "body": "Email body in standard HTML. Keep it under 150 words. Use <p> tags. Include the demo site URL as an elegant, inline CSS button (e.g., <a href='...' style='display:inline-block; padding:10px 20px; background:#000; color:#fff; text-decoration:none; border-radius:5px;'>See Your New Site</a>). Sign off as Max."
 }`;
 
         const email = await generateJSON<LLMEmail>(prompt, {
           task: "outreach",
-          system: "You write compelling, personalized cold outreach emails for a web design service. Be concise, human, and value-first. Never use spam words like 'limited time' or 'act now'.",
+          system: "You write compelling, hyper-personalized cold outreach emails for a premium web design agency. Be concise, human, and value-first. Never use spam words.",
         });
 
         const replyDomain = (process.env.RESEND_FROM_EMAIL || "").match(/@([^>]+)/)?.[1] || "resend.dev";
