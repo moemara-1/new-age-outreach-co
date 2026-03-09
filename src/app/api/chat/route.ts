@@ -204,7 +204,7 @@ Generate JSON:
           message,
           {
             task: "general",
-            system: "You are the AI assistant for MAX (Marketing Agent E-Xperience). You help users find local business leads, build websites, and send outreach emails. Be helpful, concise, and conversational. Do not use markdown if possible.",
+            system: "You are the AI assistant for New Age. You help users find local business leads, build websites, and send outreach emails. Be helpful, concise, and conversational. Do not use markdown if possible.",
             maxTokens: 500
           }
         );

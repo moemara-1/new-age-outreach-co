@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MAX — Lead Generation",
-  description: "AI-powered local business lead generation system",
+  title: "New Age — Lead Generation",
+  description: "Autonomous AI Agency Pipeline",
 };
 
 export default function RootLayout({
