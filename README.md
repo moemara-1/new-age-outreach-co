@@ -1,7 +1,7 @@
 # OpenClaw AI Agency Pipeline
 
 ![OpenClaw Dashboard UI](./public/screenshot.png)
-*(Please add your dashboard screenshot to `public/screenshot.png`)*
+
 
 An end-to-end, fully autonomous AI web agency pipeline that scouts for local businesses, deeply researches their digital presence, generates premium demo websites, and runs personalized cold email outreach—all powered by modern LLMs and web scraping.
 
