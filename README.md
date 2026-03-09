@@ -1,6 +1,18 @@
 # OpenClaw AI Agency Pipeline
 
+![OpenClaw Dashboard UI](./public/screenshot.png)
+*(Please add your dashboard screenshot to `public/screenshot.png`)*
+
 An end-to-end, fully autonomous AI web agency pipeline that scouts for local businesses, deeply researches their digital presence, generates premium demo websites, and runs personalized cold email outreach—all powered by modern LLMs and web scraping.
+
+## ✨ Core Capabilities
+
+- **Autonomous Lead Generation**: Scrapes Google Maps to find local businesses without websites.
+- **Deep Digital Intel**: Multi-query web research extracting real emails, Egyptian/international phone numbers, social media links, and even restaurant menus.
+- **Premium Website Generation**: Uses MiniMax M2.5 to programmatically generate stunning, single-page HTML websites featuring CSS animations, glass morphism, Unsplash photography, and Google Fonts.
+- **Aggressive Junk Filtering**: Automatically filters out 50+ common junk email domains to ensure high deliverability.
+- **Hyper-Personalized Outreach**: AI writes cold emails referencing the exact rating, reviews, and missing digital assets of the business.
+- **Real-Time Dashboard**: Monitor all 5 BullMQ AI agents in real-time as they scout, research, build, and email.
 
 ## 🚀 The Pipeline
 
