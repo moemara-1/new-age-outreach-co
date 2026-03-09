@@ -183,7 +183,7 @@ Generate JSON:
         throw err;
       }
     },
-    { connection, concurrency: 3 }
+    { connection, concurrency: 1 }
   );
 }
 

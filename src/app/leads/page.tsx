@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { ActivityModal } from "@/components/dashboard/activity-modal";
+import { ResearchButton } from "@/components/leads/research-button";
 
 const STATUS_COLORS: Record<string, string> = {
   NEW: "bg-gray-500",
@@ -16,12 +18,29 @@ const STATUS_COLORS: Record<string, string> = {
   UNSUBSCRIBED: "bg-gray-400",
 };
 
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true });
+}
+
 export default async function LeadsPage() {
   const leads = await db.lead.findMany({
-    include: { business: true, demoSite: true, campaign: true },
+    include: { business: true, demoSite: true, campaign: true, outreachMessages: true },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
+
+  const activityLines = await db.activityLog.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+
+  const activity = activityLines.map(log => ({
+    id: log.id,
+    agent: log.agent,
+    time: formatTime(log.createdAt),
+    title: log.title,
+    subtitle: log.subtitle || undefined,
+  }));
 
   return (
     <div className="min-h-screen bg-[#0C0C0C] text-white p-8">
@@ -41,8 +60,11 @@ export default async function LeadsPage() {
                 <th className="px-4 py-3 font-medium">Campaign</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Score</th>
-                <th className="px-4 py-3 font-medium">Rating</th>
-                <th className="px-4 py-3 font-medium">Demo Site</th>
+                <th className="px-4 py-3 font-medium">Email</th>
+                <th className="px-4 py-3 font-medium">Phone</th>
+                <th className="px-4 py-3 font-medium">Research</th>
+                <th className="px-4 py-3 font-medium">Maps</th>
+                <th className="px-4 py-3 font-medium">Demo/Outreach</th>
               </tr>
             </thead>
             <tbody>
@@ -62,23 +84,54 @@ export default async function LeadsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-[#ccc] font-mono">{lead.leadScore ?? "—"}</td>
-                  <td className="px-4 py-3 text-[#ccc]">
-                    {lead.business.rating ? `${lead.business.rating.toFixed(1)} (${lead.business.reviewCount})` : "—"}
+                  <td className="px-4 py-3">
+                    {lead.contactEmail ? (
+                      <span className="text-green-400 text-xs">{lead.contactEmail}</span>
+                    ) : (
+                      <span className="text-[#444] text-xs">Not found</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
-                    {lead.demoSite ? (
-                      <a href={lead.demoSite.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-xs">
-                        View
-                      </a>
+                    {lead.business.phone ? (
+                      <span className="text-[#ccc] text-xs">{lead.business.phone}</span>
                     ) : (
-                      <span className="text-[#444]">—</span>
+                      <span className="text-[#444] text-xs">Not found</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <ResearchButton profileJson={lead.profileJson} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <a
+                      href={`https://www.google.com/maps/place/?q=place_id:${lead.business.placeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline text-xs"
+                    >
+                      Maps ↗
+                    </a>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      {lead.demoSite ? (
+                        <a href={lead.demoSite.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-xs">
+                          View Site ↗
+                        </a>
+                      ) : (
+                        <span className="text-[#444] text-xs">No Site</span>
+                      )}
+                      {lead.outreachMessages.length > 0 ? (
+                        <span className="text-green-400 text-xs">{lead.outreachMessages.length} Email(s) Sent</span>
+                      ) : (
+                        <span className="text-[#444] text-xs">No outreach</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
               {leads.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[#555]">
+                  <td colSpan={9} className="px-4 py-8 text-center text-[#555]">
                     No leads yet. Create a campaign to start finding leads.
                   </td>
                 </tr>
@@ -87,6 +140,7 @@ export default async function LeadsPage() {
           </table>
         </div>
       </div>
+      <ActivityModal entries={activity} />
     </div>
   );
 }

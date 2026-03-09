@@ -7,6 +7,9 @@ const AGENT = "scheduler";
 const STALLED_DAYS = 7;
 const NO_REPLY_DAYS = 5;
 
+// NOTE: Closer agent is REACTIVE — it only fires when an inbound email reply
+// arrives via the /api/webhooks/email/inbound route. It is NOT scheduled.
+
 export type SchedulerJobData = {
   agentRunId: string;
 };
@@ -42,20 +45,82 @@ export function createSchedulerWorker(connection: { host: string; port: number }
             updatedAt: { lt: stalledCutoff },
             contactEmail: { not: null },
           },
-          select: { id: true },
+          select: { id: true, campaignId: true },
           take: 20,
         });
 
         if (stalledLeads.length > 0) {
           const outreachQueue = new Queue("outreach", { connection });
-          for (const lead of stalledLeads) {
+          for (let i = 0; i < stalledLeads.length; i++) {
+            const lead = stalledLeads[i];
             const run = await db.agentRun.create({
-              data: { agent: "OUTREACH", status: "QUEUED", input: { leadId: lead.id } as unknown as Prisma.InputJsonValue },
+              data: { agent: "OUTREACH", campaignId: lead.campaignId, status: "QUEUED", input: { leadId: lead.id } as unknown as Prisma.InputJsonValue },
             });
-            await outreachQueue.add("outreach", { leadId: lead.id, agentRunId: run.id });
+            await outreachQueue.add("outreach", { leadId: lead.id, agentRunId: run.id }, { delay: i * 10_000 });
             queued++;
           }
-          logger.info(AGENT, `Queued outreach for ${stalledLeads.length} stalled leads`);
+          logger.info(AGENT, `Queued outreach for ${stalledLeads.length} stalled leads (staggered 10s apart)`);
+        }
+
+        // Instantly queue outreach for freshly built sites (don't wait 7 days!)
+        const freshBuiltLeads = await db.lead.findMany({
+          where: {
+            status: "SITE_BUILT",
+            outreachMessages: { none: {} },
+          },
+          select: { id: true, campaignId: true },
+          take: 20,
+        });
+
+        if (freshBuiltLeads.length > 0) {
+          const outreachQueue = new Queue("outreach", { connection });
+          for (let i = 0; i < freshBuiltLeads.length; i++) {
+            const lead = freshBuiltLeads[i];
+            const run = await db.agentRun.create({
+              data: { agent: "OUTREACH", campaignId: lead.campaignId, status: "QUEUED", input: { leadId: lead.id } as unknown as Prisma.InputJsonValue },
+            });
+            await outreachQueue.add("outreach", { leadId: lead.id, agentRunId: run.id }, { delay: i * 10_000 });
+            queued++;
+          }
+          logger.info(AGENT, `Queued outreach for ${freshBuiltLeads.length} freshly built leads (staggered 10s apart)`);
+        }
+
+        const newLeads = await db.lead.findMany({
+          where: { status: "NEW" },
+          select: { id: true, campaignId: true },
+          take: 50,
+        });
+
+        if (newLeads.length > 0) {
+          const intelQueue = new Queue("intel", { connection });
+          for (let i = 0; i < newLeads.length; i++) {
+            const lead = newLeads[i];
+            const run = await db.agentRun.create({
+              data: { agent: "INTEL", campaignId: lead.campaignId, status: "QUEUED", input: { leadId: lead.id } as unknown as Prisma.InputJsonValue },
+            });
+            await intelQueue.add("intel", { leadId: lead.id, agentRunId: run.id }, { delay: i * 10_000 });
+            queued++;
+          }
+          logger.info(AGENT, `Queued intel for ${newLeads.length} new leads (staggered 10s apart)`);
+        }
+
+        const researchedLeads = await db.lead.findMany({
+          where: { status: "RESEARCHED" },
+          select: { id: true, campaignId: true },
+          take: 50,
+        });
+
+        if (researchedLeads.length > 0) {
+          const builderQueue = new Queue("builder", { connection });
+          for (let i = 0; i < researchedLeads.length; i++) {
+            const lead = researchedLeads[i];
+            const run = await db.agentRun.create({
+              data: { agent: "BUILDER", campaignId: lead.campaignId, status: "QUEUED", input: { leadId: lead.id } as unknown as Prisma.InputJsonValue },
+            });
+            await builderQueue.add("builder", { leadId: lead.id, agentRunId: run.id }, { delay: i * 10_000 });
+            queued++;
+          }
+          logger.info(AGENT, `Queued builder for ${researchedLeads.length} researched leads (staggered 10s apart)`);
         }
 
         const noReplyCutoff = new Date(now.getTime() - NO_REPLY_DAYS * 24 * 60 * 60 * 1000);

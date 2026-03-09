@@ -18,12 +18,12 @@ export const TASK_MODELS: Record<TaskType, ModelEntry> = {
     name: "Llama 3.3 70B",
   },
   "builder-copy": {
-    id: "qwen/qwen3-coder:free",
-    name: "Qwen3 Coder",
+    id: "minimax/minimax-m2.5",
+    name: "MiniMax M2.5",
   },
   "builder-html": {
-    id: "qwen/qwen3-coder:free",
-    name: "Qwen3 Coder",
+    id: "minimax/minimax-m2.5",
+    name: "MiniMax M2.5",
   },
   "outreach": {
     id: "meta-llama/llama-3.3-70b-instruct:free",
@@ -34,11 +34,11 @@ export const TASK_MODELS: Record<TaskType, ModelEntry> = {
     name: "Qwen3 Next 80B",
   },
   "classify": {
-    id: "mistralai/mistral-small-3.1-24b-instruct:free",
-    name: "Mistral Small 3.1",
+    id: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Llama 3.3 70B",
   },
   "general": {
-    id: "mistralai/mistral-small-3.1-24b-instruct:free",
-    name: "Mistral Small 3.1",
+    id: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Llama 3.3 70B",
   },
 };

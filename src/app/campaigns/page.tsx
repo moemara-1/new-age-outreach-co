@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type Campaign = {
   id: string;
@@ -16,10 +17,23 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [form, setForm] = useState({ name: "", location: "", category: "" });
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/campaigns").then((r) => r.json()).then(setCampaigns);
   }, []);
+
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure? This will delete all leads, sites, and emails for this campaign.")) return;
+    setDeleting(id);
+    const res = await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    } else {
+      alert("Failed to delete campaign");
+    }
+    setDeleting(null);
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -51,7 +65,12 @@ export default function CampaignsPage() {
   return (
     <div className="min-h-screen bg-[#0C0C0C] text-white p-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Campaigns</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/" className="text-[#888] hover:text-white transition-colors">
+            ← Back
+          </Link>
+          <h1 className="text-2xl font-bold">Campaigns</h1>
+        </div>
 
         <form onSubmit={handleCreate} className="flex gap-3 mb-8">
           <input
@@ -98,8 +117,16 @@ export default function CampaignsPage() {
                   {c._count.leads} leads
                 </span>
                 <span
+                  title={c.active ? "Active" : "Inactive"}
                   className={`w-2 h-2 rounded-full ${c.active ? "bg-green-500" : "bg-[#666]"}`}
                 />
+                <button
+                  onClick={() => handleDelete(c.id)}
+                  disabled={deleting === c.id}
+                  className="text-red-500 text-sm hover:text-red-400 disabled:opacity-50 ml-2"
+                >
+                  {deleting === c.id ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </div>
           ))}

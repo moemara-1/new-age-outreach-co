@@ -51,8 +51,15 @@ export function createOutreachWorker(connection: { host: string; port: number })
           include: { business: true, demoSite: true, outreachMessages: true },
         });
 
-        if (!lead.contactEmail) {
-          throw new Error(`Lead ${lead.id} has no contact email`);
+        const targetEmail = lead.contactEmail;
+        if (!targetEmail || targetEmail.endsWith("@example.com")) {
+          logger.info(AGENT, `Skipping ${lead.business.name} — no real contact email`);
+          const result = { leadId: lead.id, skipped: true, reason: "no_email" };
+          await db.agentRun.update({
+            where: { id: agentRunId },
+            data: { status: "COMPLETED", finishedAt: new Date(), output: result as unknown as Prisma.InputJsonValue },
+          });
+          return result;
         }
 
         const skipStatuses = ["REPLIED", "INTERESTED", "CLOSED_WON", "CLOSED_LOST", "UNSUBSCRIBED"];
@@ -101,17 +108,20 @@ Generate JSON:
           system: "You write compelling, personalized cold outreach emails for a web design service. Be concise, human, and value-first. Never use spam words like 'limited time' or 'act now'.",
         });
 
+        const replyDomain = (process.env.RESEND_FROM_EMAIL || "").match(/@([^>]+)/)?.[1] || "resend.dev";
         const { resendId } = await sendEmail({
-          to: lead.contactEmail,
+          to: targetEmail,
           subject: email.subject,
           html: email.body,
           leadId: lead.id,
           messageType,
+          replyTo: `replies+${lead.id}@${replyDomain}`,
         });
 
         await db.outreachMessage.create({
           data: {
             leadId: lead.id,
+            to: targetEmail,
             resendId,
             type: messageType,
             subject: email.subject,
@@ -166,10 +176,16 @@ Generate JSON:
           where: { id: agentRunId },
           data: { status: "FAILED", finishedAt: new Date(), error: message },
         });
-        logger.error(AGENT, "Failed", { error: message });
+        await db.activityLog.create({
+          data: {
+            agent: "OUTREACH",
+            title: `Failed to send email`,
+            subtitle: message,
+          },
+        });
         throw err;
       }
     },
-    { connection, concurrency: 5 }
+    { connection, concurrency: 1 }
   );
 }

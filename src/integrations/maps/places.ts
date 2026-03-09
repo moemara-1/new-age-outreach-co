@@ -85,6 +85,9 @@ export async function searchPlaces(
 
     pageToken = data.nextPageToken;
     if (!pageToken) break;
+
+    // Rate limit: pause 2s between pagination calls
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   logger.info(AGENT, `Found ${results.length} places for "${query}"`);

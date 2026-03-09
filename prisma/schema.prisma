@@ -91,8 +91,8 @@ model Lead {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  business Business @relation(fields: [businessId], references: [id])
-  campaign Campaign @relation(fields: [campaignId], references: [id])
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   demoSite         DemoSite?
   outreachMessages OutreachMessage[]
@@ -111,12 +111,13 @@ model DemoSite {
   htmlContent String?
   copyJson    Json?
 
-  lead Lead @relation(fields: [leadId], references: [id])
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 }
 
 model OutreachMessage {
   id        String       @id @default(cuid())
   leadId    String
+  to        String?
   resendId  String?      @unique
   type      OutreachType
   subject   String
@@ -128,7 +129,7 @@ model OutreachMessage {
   replyBody String?
   createdAt DateTime     @default(now())
 
-  lead Lead @relation(fields: [leadId], references: [id])
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
   @@index([type])
@@ -145,7 +146,7 @@ model Payment {
   paidAt           DateTime?
   createdAt        DateTime @default(now())
 
-  lead Lead @relation(fields: [leadId], references: [id])
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 }
 
 model AgentRun {
@@ -160,7 +161,7 @@ model AgentRun {
   finishedAt DateTime?
   createdAt  DateTime       @default(now())
 
-  campaign Campaign? @relation(fields: [campaignId], references: [id])
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([agent])
   @@index([status])

@@ -1,4 +1,4 @@
-import { Worker, Job } from "bullmq";
+import { Worker, Job, Queue } from "bullmq";
 import { PrismaClient, Prisma } from "@prisma/client";
 import { logger } from "../lib/logger";
 import { searchPlaces, filterNoWebsite, type PlaceResult } from "../integrations/maps/places";
@@ -62,6 +62,10 @@ export function createScoutWorker(connection: { host: string; port: number }) {
 
         if (leadsCreated > 0) {
           notifyOpenClaw({ event: "lead.found", leadId: campaignId, data: result });
+
+          // Instantly trigger the scheduler so the Intel agent picks up the new leads!
+          const schedulerQueue = new Queue("scheduler", { connection });
+          await schedulerQueue.add("scheduled-check", { agentRunId: "" });
         }
 
         logger.info(AGENT, "Completed", result);
@@ -76,7 +80,7 @@ export function createScoutWorker(connection: { host: string; port: number }) {
         throw err;
       }
     },
-    { connection, concurrency: 2 }
+    { connection, concurrency: 1 }
   );
 }
 

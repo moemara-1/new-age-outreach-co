@@ -59,7 +59,7 @@ export function ActivitySidebar({ entries: initial }: { entries: ActivityEntry[]
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-          <span className="text-[13px] font-bold text-white tracking-[1.5px]">ACTIVITY</span>
+          <span className="text-[13px] font-bold text-white tracking-[1.5px]">LIVE LOGS (Activity)</span>
         </div>
         <CountBadge count={entries.length} />
       </div>
